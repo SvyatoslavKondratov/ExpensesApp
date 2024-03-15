@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  server:
+    build: .
+    container_name: expensesApp
+    ports:
+      - '8080:8080'
+    depends_on:
+      - mongo
+    links:
+      - mongo
+    volumes:
+      - .env:/app/.env
+
+  mongo:
+    container_name: mongo
+    command: ['--replSet', 'rs0', '--bind_ip_all', '--port', '27017']
+    image: mongo:7.0
+    ports:
+      - 27017:27017
+    restart: always
+    healthcheck:
+      # test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
+      test: mongosh /docker-entrypoint-initdb.d/mongo-init.js --port 27017 --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 1s
+      retries: 30
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:rx
+      - mongodata:/data/db
+
+  mongo-express:
+    image: mongo-express:1.0.0-20
+    depends_on:
+      - mongo
+    restart: always
+    ports:
+      - 8081:8081
+
+volumes:
+  mongodata:
