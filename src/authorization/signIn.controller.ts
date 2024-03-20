@@ -1,16 +1,15 @@
 import { Body, Controller, Post, UseFilters } from '@nestjs/common'
 import { AuthorizationService } from './authorization.service'
-import { User } from '@prisma/client'
-import { UserDTO } from 'src/database/dto/user'
+import { CreateUserDTO } from 'src/database/dto/user'
 import { HttpExceptionFilter } from 'src/filters/http-exception.filter'
 
-@Controller('authorization')
-export class AuthorizationController {
+@Controller('signIn')
+export class SignInController {
   constructor(private readonly auhtorization: AuthorizationService) {}
 
   @Post()
   @UseFilters(new HttpExceptionFilter())
-  async authorize(@Body() body: UserDTO): Promise<User> {
-    return this.auhtorization.authorize(body)
+  async sigIn(@Body() body: CreateUserDTO): Promise<void> {
+    return this.auhtorization.signIn(body)
   }
 }
