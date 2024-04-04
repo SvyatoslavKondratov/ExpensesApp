@@ -3,16 +3,22 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common'
-import { User } from '@prisma/client'
 import { UserService } from 'src/database/user/user.service'
 import * as bcrypt from 'bcrypt'
 import { CreateUserDTO, UserDTO } from 'src/database/dto/user'
+import { FastifySessionObject } from '@fastify/session'
+import { User } from '@prisma/client'
+import { FastifyReply } from 'fastify'
 
 @Injectable()
 export class AuthorizationService {
   constructor(private readonly userService: UserService) {}
 
-  async authorize(body: UserDTO): Promise<User> {
+  async authorize(
+    body: UserDTO,
+    session: FastifySessionObject,
+    response: FastifyReply,
+  ): Promise<Partial<User>> {
     const { email, password } = body
     const user = await this.userService.user({ email })
     const { password: userPassword } = user || {}
@@ -23,7 +29,21 @@ export class AuthorizationService {
         { description: 'Incorrect credentials' },
       )
     }
-    return result
+    const sessionId = session.get<any>('sessionId')
+    session.set<any>(
+      'user',
+      JSON.stringify({
+        username: user.name,
+        role: user.role,
+        email: user.email,
+      }),
+    )
+    session.save()
+    response.setCookie('sid', sessionId)
+    return {
+      name: user.name,
+      role: user.role,
+    }
   }
 
   async signIn(body: CreateUserDTO): Promise<void> {
@@ -41,6 +61,7 @@ export class AuthorizationService {
         email,
         password: hashedPassword,
         name,
+        role: 'User',
       })
     } else {
       throw new UnauthorizedException(

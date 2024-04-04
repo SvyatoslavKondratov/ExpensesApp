@@ -12,4 +12,14 @@ model User {
   email   String   @unique
   password String  @unique
   name    String
+  role    String
+  emailVerified DateTime? 
+  createdAt     DateTime @default(now()) 
+  updatedAt     DateTime  @updatedAt
+}
+
+model Sessions {
+  id String  @id @map("_id")
+  expires DateTime
+  session String
 }

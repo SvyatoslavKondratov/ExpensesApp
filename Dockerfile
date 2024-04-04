@@ -6,7 +6,7 @@
 
 # Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
-ARG NODE_VERSION=18.15.0
+ARG NODE_VERSION=18.17.0
 
 FROM node:${NODE_VERSION}-slim
 
@@ -15,6 +15,7 @@ WORKDIR /app
 COPY . .
 
 RUN yarn install
+RUN apt-get update -y && apt-get install -y openssl
 RUN npx prisma generate
 
 CMD ["yarn", "start"]

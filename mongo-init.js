@@ -27,6 +27,9 @@ if (isInit) {
       name: 'testUser',
       email: 'some@gmail.com',
       password: '$2b$12$RGR3XVDbAcavp8DtgGnAE.oYWpP1jHQZB6Or2zUMbAno7E3MuFMAi',
+      role: 'SuperAdmin',
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   ])
   isInit = false
